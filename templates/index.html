@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Chat de conversas  </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+    <!-- cdn boostrap icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        html, body{
+            height: 100svh;
+        }
+        body{
+            align-content: center;
+        }
+
+        main{
+            box-shadow: 0px 0px 10px 1px rgb(180, 177, 177);
+            width: 80vw;
+            height: 90svh;
+            align-self: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header{
+          max-height: 70px;
+          background-color: rgb(0, 88, 170);
+          color: white;
+        }
+
+        .content{
+          flex: 1;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          overflow-y: scroll;
+        }
+
+        .footer{
+          height: 65px;
+          width: 95%;
+          margin: 0 auto;
+          box-shadow: 0px 0px 10px 1px rgb(180, 177, 177);
+          border-radius: 10px;
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .footer > .input-group{
+          height: 100%;
+          width: 90%;
+          padding: 10px;
+        }
+
+        .input-group span:hover{
+          cursor: pointer;
+        }
+
+        .content > .card {
+            width: fit-content;
+            max-width: 70%;
+            min-width: 400px;
+            margin: 5px 0 ;
+            display: flex;
+            box-shadow: 0px 0px 5px #b4b1b1;
+            background-color: beige;
+        }
+
+        .card p{
+          margin-bottom: 0px;
+          padding: 2px;
+        }
+
+        .identificacao{
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 4px;
+              background-color: #0000007d;
+              padding: 2px;
+              border-radius: 5px 5px 0 0px;
+        }
+
+        .identificacao > span:first-of-type{
+          font-weight: bold;
+          font-size: 11pt;
+        }
+
+        .identificacao .data-msg{
+          font-size: 10pt;
+        }
+
+        .content > div.my-msg{
+              align-self: end;
+              background: darkseagreen;
+        }
+        
+    </style>
+</head>
+<body >
+    <main class="border  m-auto">
+        <header class="p-2">
+          <h2 class="text-center"> {{usuario}}, bem vindo ao nosso chat </h2>
+        </header>
+
+        <div class="content p-2" id="chat-box">
+          {% for user, mensagem, hora in mensagens %}
+            {% if user == usuario %}
+              {% set style_msg = 'my-msg' %}
+            {% else %}
+                 {% set style_msg = '' %}
+            {% endif %}
+            <div class="card {{ style_msg }}">
+              <div class="identificacao">
+                <span> {{ user }} </span>
+                <span class="data-msg">  {{ hora }} </span>
+              </div>
+              
+              <p > {{ mensagem }} </p>
+            </div>
+          {% endfor %}
+
+        </div>
+
+        <div class="footer">
+          <div class="input-group">
+            <input name="mensagem" type="text" class="form-control h-100" placeholder="Dgite sua mensagem">
+            <span class="input-group-text h-100 bg-primary" onclick="enviarMensagem()">
+              <i class="bi bi-send-fill fs-3 mx-1 text-white" id="btsend"></i>
+            </span>
+          </div>
+
+          <i class="bi bi-file-plus fs-3 mx-2 bg-light "></i>
+          
+        </div>
+    </main>
+
+    <script>
+      const socket = io()
+
+
+      function enviarMensagem(){
+        entrada = document.querySelector('main input[name="mensagem"]')
+        if (entrada.value != ""){
+          socket.emit('mensagem', {'mensagem':entrada.value } )
+          entrada.value = ''
+          }
+      }
+
+
+      socket.on('mensagem_recebida', (data) => {
+        const chatBox = document.querySelector('#chat-box')
+        
+        styleMsg = ''
+        
+        if ('{{ usuario }}'  == data.nome){
+          data.nome = 'Você'
+          styleMsg = 'my-msg'
+        }
+        
+        const msg = `<div class="card ${styleMsg}"> <div class="identificacao">  
+          <span> ${data.nome} </span>
+          <span class="data-msg"> ${data.horario}  </span>
+          </div>
+          <p > ${data.mensagem} </p> </div>
+          `
+          chatBox.innerHTML += msg
+          chatBox.scrollTop = chatBox.scrollHeight;
+      })
+
+
+      socket.on('carrega_historico', (dados) => {
+        const chatBox = document.querySelector('#chat-box')
+        
+        styleMsg = ''
+        
+        if ('{{ usuario }}'  == dados.usuario){
+          dados.usuario = 'Você'
+          styleMsg = 'my-msg'
+        }
+        
+        const msg = `<div class="card ${styleMsg}"> <div class="identificacao">  
+          <span> ${dados.usuario} </span>
+          <span class="dados-msg"> ${dados.hora}  </span>
+          </div>
+          <p > ${dados.mensagem} </p> </div>
+          `
+          chatBox.innerHTML += msg
+          chatBox.scrollTop = chatBox.scrollHeight;
+      })
+
+
+      document.querySelector('main input[name="mensagem"]').addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault(); // impede quebra de linha
+          enviarMensagem();       // chama sua função de envio
+        }
+      });
+          
+    </script>
+</body>
+</html>

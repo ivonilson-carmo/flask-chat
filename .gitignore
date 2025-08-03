@@ -1,0 +1,27 @@
+# Ambientes virtuais
+venv/
+.env/
+
+# Bytecode do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Configs de IDEs
+.vscode/
+.idea/
+
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.bak
+
+# Arquivos de build (caso use dist ou setup)
+dist/
+build/
+*.egg-info/
