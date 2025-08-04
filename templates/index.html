@@ -147,7 +147,7 @@
       function enviarMensagem(){
         entrada = document.querySelector('main input[name="mensagem"]')
         if (entrada.value != ""){
-          socket.emit('mensagem', {'mensagem':entrada.value } )
+          socket.emit('mensagem', {'mensagem':entrada.value , 'user': '{{ usuario }}' } )
           entrada.value = ''
           }
       }
