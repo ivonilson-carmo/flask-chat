@@ -63,7 +63,7 @@ def chat():
 
 @socketio.on('mensagem')
 def handle_msg(data):
-    nome = session.get('user')
+    nome = data['user']
     texto = data['mensagem']
     horario = horario_formatado()
 
