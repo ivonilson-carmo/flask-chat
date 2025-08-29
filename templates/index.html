@@ -9,6 +9,9 @@
     <!-- cdn boostrap icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
      <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cutive&display=swap" rel="stylesheet">
     <style>
         html, body{
             height: 100svh;
@@ -19,8 +22,8 @@
 
         main{
             box-shadow: 0px 0px 10px 1px rgb(180, 177, 177);
-            width: 80vw;
-            height: 90svh;
+            width: 100vw;
+            height: 100svh;
             align-self: center;
             display: flex;
             flex-direction: column;
@@ -28,8 +31,13 @@
 
         header{
           max-height: 70px;
-          background-color: rgb(0, 88, 170);
+          background-color: #179860;
           color: white;
+        }
+
+        h2{
+          font-family: 'Cutive', serif;
+          font-size: 16pt;
         }
 
         .content{
@@ -58,6 +66,10 @@
           padding: 10px;
         }
 
+        .footer span{
+          background-color: #179860;
+        }
+
         .input-group span:hover{
           cursor: pointer;
         }
@@ -69,12 +81,14 @@
             margin: 5px 0 ;
             display: flex;
             box-shadow: 0px 0px 5px #b4b1b1;
-            background-color: beige;
+            background-color: #DEF4C6;
+            font-family: 'Cutive', serif;
+            font-size: 10pt;
         }
 
         .card p{
           margin-bottom: 0px;
-          padding: 2px;
+          padding: 4px;
         }
 
         .identificacao{
@@ -87,17 +101,17 @@
         }
 
         .identificacao > span:first-of-type{
-          font-weight: bold;
-          font-size: 11pt;
+          font-size: 8pt;
         }
 
         .identificacao .data-msg{
-          font-size: 10pt;
+          font-size: 8pt;
         }
 
         .content > div.my-msg{
               align-self: end;
-              background: darkseagreen;
+              background: #1E352F;
+              color: #fff;
         }
         
     </style>
@@ -130,12 +144,10 @@
         <div class="footer">
           <div class="input-group">
             <input name="mensagem" type="text" class="form-control h-100" placeholder="Dgite sua mensagem">
-            <span class="input-group-text h-100 bg-primary" onclick="enviarMensagem()">
+            <span class="input-group-text h-100 " onclick="enviarMensagem()">
               <i class="bi bi-send-fill fs-3 mx-1 text-white" id="btsend"></i>
             </span>
           </div>
-
-          <i class="bi bi-file-plus fs-3 mx-2 bg-light "></i>
           
         </div>
     </main>

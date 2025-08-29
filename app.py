@@ -1,11 +1,12 @@
+import eventlet
+
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, request, redirect, url_for, session
 from dados import cria_user, valida_usuario, carregar_mensagens, salva_mensagem
 from flask_socketio import SocketIO, emit
 from datetime import datetime
 import os
-import eventlet
-
-eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.secret_key = 'minha_chave_secreta'
@@ -80,4 +81,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app=)

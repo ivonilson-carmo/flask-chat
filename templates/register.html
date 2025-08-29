@@ -17,6 +17,7 @@
         main{
             box-shadow: 0px 0px 10px 1px rgb(180, 177, 177);
             width: 450px;
+            background: #179860;
         }
 
         form{
@@ -26,7 +27,7 @@
         }
         form > div{
             margin-bottom: 1.4rem;
-            width: 90%;
+            width: 85%;
         }
 
         form input.btn {
@@ -34,6 +35,12 @@
             height: 50px;
             font-weight: bold;
             margin-top: 1rem;
+            background-color: #D4F2E2;
+            color: #000;
+        }
+
+        form span, form span a{
+            color: #fff;
         }
     </style>
 </head>
@@ -58,7 +65,7 @@
             </div>
             <input type="submit" value="Entrar" class=" btn btn-success w-50">
 
-            <div class="mt-3">
+            <div class="mt-3 text-center">
                 <span> Já possui conta? <a href="{{ url_for('login') }}">Faça login</a></span>
             </div>
         </form>
