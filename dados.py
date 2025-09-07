@@ -1,82 +1,87 @@
-import sqlite3, bcrypt
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
 
-conn = sqlite3.connect('users.db')
-cursor = conn.cursor()
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS users(
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               username TEXT UNIQUE, 
-               password BLOB)
-               ''')
-
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS messages(
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               sender TEXT NOT NULL,
-               message TEXT NOT NULL ,
-               timestamp TEXT NOT NULL)
-               ''')
-
-conn.commit()
-conn.close()
-
-def cria_user(nome, passwd):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-
-    hashed_pass = bcrypt.hashpw(passwd.encode(), bcrypt.gensalt())
+db = SQLAlchemy()
 
 
-    try:
-        cursor.execute('''
-        INSERT INTO users (username, password)
-        VALUES (?, ?)''', (nome, hashed_pass))
-        conn.commit()
-    except sqlite3.IntegrityError:
-        print(f"[!] Usuário '{nome}' já existe.")
-    finally:
-        conn.close()
+# cria tabelas
+class Usuario(db.Model):
+    __tablename__ = "usuarios"
 
-def valida_usuario(nome, passwd):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    senha_hash = db.Column(db.LargeBinary, nullable=False)
 
-    cursor.execute('''
-        SELECT password FROM users WHERE username = ? ''', (nome,))
 
-    resultado = cursor.fetchone()
-    conn.close()
-
-    if resultado:
-        hashed = resultado[0]
-        return bcrypt.checkpw(passwd.encode(), hashed)
-
-    return False
-
-def salva_mensagem(sender, mensagem, timestamp):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        INSERT into messages(sender, message, timestamp)
-        VALUES (?,?,?)''', (sender, mensagem, timestamp) )
+    def set_senha(self, senha):
+        """ cria senha com hash"""
+        self.senha_hash = generate_password_hash(senha).encode()
     
-    conn.commit()
-    conn.close()
+    def verifica_senha(self, senha):
+        """ verifica senha informada com hash salvo """
+        return check_password_hash(self.senha_hash.decode(), senha)
+
+
+class Menssage(db.Model):
+    __tablename__ = "mensagens"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id') ,nullable=False)
+    conteudo = db.Column(db.Text, nullable=False)
+    horario = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    usuario = db.relationship('Usuario', backref='mensagens')
+
+
+
+# funcoes auxiliares
+
+def cria_user(username, senha):
+    """ cria novo usuario """
+    if Usuario.query.filter_by(username=username).first():
+        return False # user ja existe
+    
+    novo = Usuario(username=username)
+    novo.set_senha(senha)
+
+    db.session.add(novo)
+    db.session.commit()
+    return True
+
+def valida_usuario(username, senha):
+    """ Valida se existe login """
+    user = Usuario.query.filter_by(username=username).first()
+    if user and user.verifica_senha(senha):
+        return True
+    
+    return False
+    
+
+def salva_mensagem(username, conteudo, horario):
+    user = Usuario.query.filter_by(username=username).first()
+    if not user:
+        return False
+    
+    msg = Menssage(user_id=user.id, conteudo=conteudo, horario=horario)
+    db.session.add(msg)
+    db.session.commit()
+
+    return True
 
 
 def carregar_mensagens():
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
+    """ carrega as mensagens ordenada por data """
+    mensagens = Menssage.query.order_by(Menssage.horario.asc()).all()
+    lista = []
 
-    cursor.execute('''
-        SELECT sender, message, timestamp FROM messages
-        ORDER BY id ASC
-    ''')
-
-    mensagens = cursor.fetchall()
-    conn.close()
-    return mensagens
+    for msg in mensagens:
+        lista.append({
+            'nome': msg.usuario.username,
+            'mensagem': msg.conteudo,
+            'horario': msg.horario.strftime('%d/%m/%Y %H:%M')
+        })
+    
+    return lista
 

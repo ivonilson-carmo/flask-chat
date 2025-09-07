@@ -123,19 +123,19 @@
         </header>
 
         <div class="content p-2" id="chat-box">
-          {% for user, mensagem, hora in mensagens %}
-            {% if user == usuario %}
+          {% for dados in mensagens %}
+            {% if (dados['nome'] == usuario) %}
               {% set style_msg = 'my-msg' %}
             {% else %}
                  {% set style_msg = '' %}
             {% endif %}
             <div class="card {{ style_msg }}">
               <div class="identificacao">
-                <span> {{ user }} </span>
-                <span class="data-msg">  {{ hora }} </span>
+                <span> {{ dados['nome']  if (dados['nome'] != usuario) else 'Você' }} </span>
+                <span class="data-msg">  {{ dados['horario'] }} </span>
               </div>
               
-              <p > {{ mensagem }} </p>
+              <p > {{ dados['mensagem'] }} </p>
             </div>
           {% endfor %}
 

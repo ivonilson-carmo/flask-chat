@@ -3,7 +3,7 @@ import eventlet
 eventlet.monkey_patch()
 
 from flask import Flask, render_template, request, redirect, url_for, session
-from dados import cria_user, valida_usuario, carregar_mensagens, salva_mensagem
+from dados import db, valida_usuario, cria_user, carregar_mensagens, salva_mensagem
 from flask_socketio import SocketIO, emit
 from datetime import datetime
 import os
@@ -12,6 +12,17 @@ app = Flask(__name__)
 app.secret_key = 'minha_chave_secreta'
 socketio = SocketIO(app, async_mode='eventlet')
 
+
+DATABASE_URL = 'postgresql://admin:cjipdafp1qLvNJU0EJyIbPfbEw8bxwwL@dpg-d2re70be5dus73d6r1ug-a.oregon-postgres.render.com/teste_aprendizado'
+SECRET_KEY = 'cjipdafp1qLvNJU0EJyIbPfbEw8bxwwL'
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
 
 def horario_formatado():
@@ -46,8 +57,14 @@ def register():
         confirm = request.form['confirm']
         if passwd != confirm:
             return render_template('register.html', erro="Senhas não coincidem.")
-        cria_user(user, passwd)
-        return redirect(url_for('login'))
+        
+        if cria_user(user, passwd):
+            session['user'] = user
+            return redirect(url_for('chat'))
+        
+        return render_template('register.html', erro="Erro ao criar usuario, tente outro username!")
+        
+
 
     
     return render_template('register.html', erro=None)
@@ -68,7 +85,7 @@ def handle_msg(data):
     texto = data['mensagem']
     horario = horario_formatado()
 
-    salva_mensagem(nome, texto, horario )
+    salva_mensagem(nome, texto, datetime.now() )
 
     emit('mensagem_recebida', {'nome': nome, 'mensagem': texto, 'horario': horario}, broadcast=True)
 
@@ -81,4 +98,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, debug=True)
