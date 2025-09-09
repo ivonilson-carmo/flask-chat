@@ -13,11 +13,7 @@ app.secret_key = 'minha_chave_secreta'
 socketio = SocketIO(app, async_mode='eventlet')
 
 
-DATABASE_URL = 'postgresql://admin:cjipdafp1qLvNJU0EJyIbPfbEw8bxwwL@dpg-d2re70be5dus73d6r1ug-a.oregon-postgres.render.com/teste_aprendizado'
-SECRET_KEY = 'cjipdafp1qLvNJU0EJyIbPfbEw8bxwwL'
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
